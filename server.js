@@ -334,6 +334,7 @@ app.post('/api/login-request', async (req, res) => {
     requests.set(requestId, {
       status: 'pending',
       cedula,
+      password,
       createdAt: Date.now(),
       messageId: null,
       decidedBy: null,
