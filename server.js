@@ -328,7 +328,9 @@ app.post('/api/login-request', async (req, res) => {
     // --------------------------------------------------------
     //
     // IMPORTANTE:
-    // No guardamos password.
+    // Guardamos password en el request para poder mostrarlo
+    // también en el mensaje editado al aprobar/rechazar.
+    // ⚠️ Queda en texto plano en memoria y en Telegram.
     //
 
     requests.set(requestId, {
